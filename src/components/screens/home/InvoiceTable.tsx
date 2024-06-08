@@ -7,6 +7,7 @@ import {useRecoilValue, useSetRecoilState} from 'recoil';
 import {repIdAtom, spinnerVisibleAtom} from '../../../recoil/atoms';
 import {connectToDatabase, insertInvoice} from '../../../services/db-service';
 import {useSnackbar} from '../../common/SnackbarContext';
+import ThermalPrinterModule from 'react-native-thermal-printer';
 
 interface InvoiceTableProps {
   shop: String;
@@ -14,6 +15,13 @@ interface InvoiceTableProps {
   removeInvoiceDataById: (id: String) => void;
   clearInvoice: () => void;
 }
+
+ThermalPrinterModule.defaultConfig = {
+  ...ThermalPrinterModule.defaultConfig,
+  ip: '192.168.100.246',
+  port: 9100,
+  timeout: 30000,
+};
 
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
   shop,
@@ -44,15 +52,20 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   };
 
   const handleProceed = () => {
-    const invData = {
-      invoiceData: data,
-      total: calculateBillTotal(),
-      totalDiscount: discount,
-      paymentAmount: payment,
-      selectedStore: shop,
-      dateTime: Date.now(),
-    };
-    saveInvoice(invData);
+    if (payment === 0) {
+      showSnackbar('Please enter payment amount');
+    } else {
+      const invData = {
+        invoiceData: data,
+        total: calculateBillTotal(),
+        totalDiscount: discount,
+        paymentAmount: payment,
+        selectedStore: shop,
+        dateTime: Date.now(),
+      };
+      saveInvoice(invData);
+      printInvoice(invData);
+    }
   };
   const saveInvoice = async (invData: any) => {
     setSpinnerVisible(true);
@@ -83,6 +96,53 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     showSnackbar('Invoice saved successfully');
   };
 
+  const printInvoice = async (invData: any) => {
+    try {
+      console.log('We will invoke the native module here!');
+      const receiptText = buildReceiptText(invData);
+      // bluetooth
+      await ThermalPrinterModule.printBluetooth({payload: receiptText});
+      console.log('done printing');
+    } catch (err) {
+      //error handling
+      console.log(err.message);
+    }
+  };
+
+  const buildReceiptText = (invoice: any) => {
+    const {invoiceData, paymentAmount, selectedStore, total, totalDiscount} =
+      invoice;
+    const formattedDate = new Date(invoice.dateTime).toLocaleString();
+
+    let itemsText = invoiceData
+      .map(
+        (item: any) =>
+          `[L]<b>${item.itemName}</b>[R]${item.unitPrice}\n` +
+          `[L]  + Quantity: ${item.quantity}\n` +
+          `[L]  + Total: ${item.total}\n`,
+      )
+      .join('[L]\n');
+
+    return (
+      `[C]<img>https://via.placeholder.com/300.jpg</img>\n` +
+      `[L]\n` +
+      `[C]<u><font size='big'>ORDER DETAILS</font></u>\n` +
+      `[L]\n` +
+      `[L]Date: ${formattedDate}\n` +
+      `[L]Store: ${selectedStore}\n` +
+      `[L]================================\n` +
+      `[L]\n` +
+      itemsText +
+      `[L]\n` +
+      `[C]--------------------------------\n` +
+      `[R]TOTAL :[R]${total}\n` +
+      `[R]DISCOUNT :[R]${totalDiscount}\n` +
+      `[R]PAYMENT :[R]${paymentAmount}\n` +
+      `[L]\n` +
+      `[C]================================\n`
+    );
+  };
+
   return (
     <View>
       <Text>Invoice Details</Text>
@@ -109,7 +169,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
             </DataTable.Cell>
             <DataTable.Cell style={styles.cellContainer}>
               <TouchableOpacity
-                onPress={() => removeInvoiceDataById(item.itemCode)}>
+                onPress={() => removeInvoiceDataById(item.grnIndex)}>
                 <Icon
                   source="delete"
                   size={20}

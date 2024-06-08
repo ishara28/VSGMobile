@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
   activityIndicatorWrapper: {
     backgroundColor: 'white',
-    borderRadius: 100,
+    borderRadius: 10,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around',

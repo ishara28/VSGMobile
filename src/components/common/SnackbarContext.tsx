@@ -1,5 +1,6 @@
 import React, {createContext, useContext, useState, useCallback} from 'react';
-import {Snackbar} from 'react-native-paper';
+import {Snackbar, Text} from 'react-native-paper';
+import {COMMON_COLORS} from '../../resources/colors';
 
 const SnackbarContext = createContext(null);
 
@@ -26,7 +27,9 @@ export const SnackbarProvider = ({children}) => {
           label: 'Close',
           onPress: hideSnackbar,
         }}>
-        {message}
+        <Text variant="labelSmall" style={{color: COMMON_COLORS.WHITE}}>
+          {message}
+        </Text>
       </Snackbar>
     </SnackbarContext.Provider>
   );

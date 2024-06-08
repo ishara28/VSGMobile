@@ -6,6 +6,7 @@ import {
   SettingsStackScreen,
 } from './StackNavigator';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {Text} from 'react-native-paper';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -22,8 +23,9 @@ const TabNavigator = () => {
         component={HomeStackScreen}
         options={{
           title: 'Home',
+          headerTitle: () => <Text variant="titleMedium">Home</Text>,
           tabBarIcon: ({color}) => (
-            <FontAwesome name="home" color={color} size={20} />
+            <FontAwesome name="home" color={color} size={24} />
           ),
         }}
       />
@@ -43,7 +45,7 @@ const TabNavigator = () => {
         options={{
           title: 'Settings',
           tabBarIcon: ({color}) => (
-            <FontAwesome name="gear" color={color} size={20} />
+            <FontAwesome name="gear" color={color} size={24} />
           ),
         }}
       />

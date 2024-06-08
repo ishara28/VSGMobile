@@ -15,12 +15,17 @@ import {Button, Icon, IconButton, Text, TextInput} from 'react-native-paper';
 import {COMMON_COLORS} from '../../../resources/colors';
 import InvoiceTable from './InvoiceTable';
 import {useSnackbar} from '../../common/SnackbarContext';
+import {useIsFocused} from '@react-navigation/native';
+import {useRecoilValue} from 'recoil';
+import {repIdAtom} from '../../../recoil/atoms';
 
 const Home = () => {
   const {showSnackbar} = useSnackbar();
+  const isFocussed = useIsFocused();
   const [shop, setShop] = useState(null || '');
   const [item, setItem] = useState('');
-  const [repId, setRepId] = useState('REP1');
+  // const [repId, setRepId] = useState('REP1');
+  const repId = useRecoilValue(repIdAtom);
   const [isFocusShopDrodown, setIsFocusShopDrodown] = useState(false);
   const [isFocusItemDrodown, setIsItemShopDrodown] = useState(false);
 
@@ -28,14 +33,17 @@ const Home = () => {
   const [itemsList, setItemsList] = useState([]);
   const [filteredItemsList, setFilteredItemsList] = useState([]);
   const [quantity, setQuantity] = useState();
+  const [expandedItem, setExpandedItem] = useState();
 
   const [selectedItemDetails, setSelectedItemDetails] = useState(null);
   const [invoiceData, setInvoiceData] = useState([]);
 
   useEffect(() => {
-    fetchCustomers();
-    fetchItems();
-  }, []);
+    if (isFocussed) {
+      fetchCustomers();
+      fetchItems();
+    }
+  }, [isFocussed]);
 
   const fetchCustomers = async () => {
     const db = await connectToDatabase();
@@ -56,38 +64,44 @@ const Home = () => {
   };
 
   const getItemPrice = async (item: any) => {
+    setExpandedItem(item);
     const db = await connectToDatabase();
     const result = await getItemsByStockIdandCusId(db, item.SockId, shop);
-    setSelectedItemDetails(result[0]);
+    setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
   };
 
   const addToInvoice = () => {
-    const itemExists = invoiceData.some(
-      item => item.itemCode === selectedItemDetails.ItemCode,
-    );
-
-    if (!itemExists) {
-      setInvoiceData([
-        ...invoiceData,
-        {
-          itemCode: selectedItemDetails.ItemCode,
-          itemName: item,
-          labelPrice: selectedItemDetails.SalePrice,
-          itemDiscount: 0,
-          unitPrice: selectedItemDetails.SalePrice,
-          quantity: quantity,
-          total: quantity * selectedItemDetails.SalePrice,
-        },
-      ]);
-    } else {
-      showSnackbar(
-        'Item with the same ItemCode already exists in the invoice.',
+    if (expandedItem.Quantity > quantity) {
+      const itemExists = invoiceData.some(
+        item => item.grnIndex === selectedItemDetails.grnIndex,
       );
+
+      if (!itemExists) {
+        setInvoiceData([
+          ...invoiceData,
+          {
+            itemCode: selectedItemDetails.ItemCode,
+            itemName: item,
+            labelPrice: selectedItemDetails.SalePrice,
+            itemDiscount: 0,
+            unitPrice: selectedItemDetails.SalePrice,
+            quantity: quantity,
+            total: quantity * selectedItemDetails.SalePrice,
+            grnIndex: selectedItemDetails.grnIndex,
+          },
+        ]);
+      } else {
+        showSnackbar(
+          'Item with the same Grn Index already exists in the invoice.',
+        );
+      }
+    } else {
+      showSnackbar('Quantity cannot be greater than available quantity.');
     }
   };
 
-  const removeInvoiceDataById = (id: String) => {
-    setInvoiceData(invoiceData.filter(item => item?.itemCode !== id));
+  const removeInvoiceDataById = (grnIndex: String) => {
+    setInvoiceData(invoiceData.filter(item => item?.grnIndex !== grnIndex));
   };
 
   const clearInvoice = () => {
@@ -168,20 +182,26 @@ const Home = () => {
         <View>
           <View style={styles.selectedItemContainer}>
             <View>
-              <Text variant="labelLarge">Price ID</Text>
+              <Text variant="labelMedium">Price ID</Text>
               <Text variant="labelSmall">{selectedItemDetails?.PriceId}</Text>
             </View>
             <View>
-              <Text variant="labelLarge">Item Code</Text>
+              <Text variant="labelMedium">Item Code</Text>
               <Text variant="labelSmall">{selectedItemDetails?.ItemCode}</Text>
             </View>
             <View>
-              <Text variant="labelLarge">Price</Text>
+              <Text variant="labelMedium">Grn_Index</Text>
+              <Text variant="labelSmall">{selectedItemDetails?.grnIndex}</Text>
+            </View>
+            <View>
+              <Text variant="labelMedium">Price</Text>
               <Text variant="labelSmall">{selectedItemDetails?.SalePrice}</Text>
             </View>
           </View>
           <View style={styles.addContainer}>
-            <TouchableOpacity onPress={() => addToInvoice()}>
+            <TouchableOpacity
+              onPress={() => addToInvoice()}
+              disabled={quantity <= 0}>
               <Icon
                 source="plus-box"
                 size={30}
@@ -243,6 +263,7 @@ const styles = StyleSheet.create({
   placeholderStyle: {
     fontSize: 14,
     fontFamily: FONTS.POPPINS_MEDIUM,
+    color: COMMON_COLORS.GRAY.W600,
   },
   itemTextStyle: {
     fontSize: 14,
