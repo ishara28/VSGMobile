@@ -132,7 +132,7 @@ const InvoicePrint = () => {
         variant="labelSmall"
         style={{fontStyle: 'italic', textAlign: 'center'}}>
         Genarated By : AptSys Technologies 0777 968 510 www.aptsys.lk Print Date
-        and Time : {moment(Date.now()).format('YYYY/MM/DD hh:mm A')}
+        and Time : {moment(dateTime).format('YYYY/MM/DD hh:mm A')}
       </Text>
       {saveInvoice !== null && (
         <Button
