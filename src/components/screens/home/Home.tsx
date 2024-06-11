@@ -18,6 +18,7 @@ import {useSnackbar} from '../../common/SnackbarContext';
 import {useIsFocused} from '@react-navigation/native';
 import {useRecoilValue} from 'recoil';
 import {repIdAtom} from '../../../recoil/atoms';
+import Printer from '../../shared/Printer';
 
 const Home = () => {
   const {showSnackbar} = useSnackbar();
@@ -227,6 +228,7 @@ const Home = () => {
           clearInvoice={clearInvoice}
         />
       )}
+      <Printer />
     </ScrollView>
   );
 };
