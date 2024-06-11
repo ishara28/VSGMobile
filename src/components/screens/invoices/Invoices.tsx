@@ -16,10 +16,10 @@ const Invoices = () => {
 
   const [invoices, setInvoices] = useState([]);
   useEffect(() => {
-    if (isFocussed) fecthInvoices();
+    if (isFocussed) fetchInvoices();
   }, [isFocussed]);
 
-  const fecthInvoices = async () => {
+  const fetchInvoices = async () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
     const invoices = await getAllInvoices(db);
@@ -31,7 +31,7 @@ const Invoices = () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
     await deleteInvoiceById(db, item.InvoNo);
-    await fecthInvoices();
+    await fetchInvoices();
     setSpinnerVisible(false);
   };
 

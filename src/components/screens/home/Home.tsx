@@ -11,7 +11,14 @@ import {
   getItemsList,
 } from '../../../services/db-service';
 import ItemsTable from './ItemsTable';
-import {Button, Icon, IconButton, Text, TextInput} from 'react-native-paper';
+import {
+  Button,
+  Dialog,
+  Icon,
+  Portal,
+  Text,
+  TextInput,
+} from 'react-native-paper';
 import {COMMON_COLORS} from '../../../resources/colors';
 import InvoiceTable from './InvoiceTable';
 import {useSnackbar} from '../../common/SnackbarContext';
@@ -24,7 +31,6 @@ const Home = () => {
   const isFocussed = useIsFocused();
   const [shop, setShop] = useState(null || '');
   const [item, setItem] = useState('');
-  // const [repId, setRepId] = useState('REP1');
   const repId = useRecoilValue(repIdAtom);
   const [isFocusShopDrodown, setIsFocusShopDrodown] = useState(false);
   const [isFocusItemDrodown, setIsItemShopDrodown] = useState(false);
@@ -37,6 +43,19 @@ const Home = () => {
 
   const [selectedItemDetails, setSelectedItemDetails] = useState(null);
   const [invoiceData, setInvoiceData] = useState([]);
+
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const showDialog = () => setDialogVisible(true);
+  const hideDialog = () => setDialogVisible(false);
+
+  const handleResetAll = async () => {
+    setInvoiceData([]);
+    setSelectedItemDetails(null);
+    setShop(null || '');
+    setItem('');
+    hideDialog();
+  };
 
   useEffect(() => {
     if (isFocussed) {
@@ -71,7 +90,7 @@ const Home = () => {
   };
 
   const addToInvoice = () => {
-    if (expandedItem.Quantity > quantity) {
+    if (expandedItem.Quantity >= quantity) {
       const itemExists = invoiceData.some(
         item => item.grnIndex === selectedItemDetails.grnIndex,
       );
@@ -105,7 +124,7 @@ const Home = () => {
   };
 
   const clearInvoice = () => {
-    setInvoiceData([]);
+    handleResetAll();
   };
 
   return (
@@ -175,7 +194,7 @@ const Home = () => {
           )}
         />
       )}
-      {filteredItemsList.length > 0 && (
+      {filteredItemsList.length > 0 && item !== '' && (
         <ItemsTable data={filteredItemsList} getItemPrice={getItemPrice} />
       )}
       {selectedItemDetails !== null && (
@@ -227,6 +246,29 @@ const Home = () => {
           clearInvoice={clearInvoice}
         />
       )}
+
+      {item !== '' && (
+        <Button
+          icon={'undo-variant'}
+          mode="contained"
+          buttonColor={COMMON_COLORS.ERROR.W900}
+          onPress={showDialog}
+          style={styles.resetAllBtn}>
+          Reset All
+        </Button>
+      )}
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+          <Dialog.Title>Are you sure?</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">Do you want to reset all?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleResetAll}>Yes</Button>
+            <Button onPress={hideDialog}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </ScrollView>
   );
 };
@@ -295,5 +337,11 @@ const styles = StyleSheet.create({
   },
   quantityLabel: {
     marginRight: 20,
+  },
+  resetAllBtn: {
+    marginTop: 10,
+    marginBottom: 10,
+    alignSelf: 'center',
+    borderRadius: 8,
   },
 });

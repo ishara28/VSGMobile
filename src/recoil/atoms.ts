@@ -15,3 +15,8 @@ export const repIdAtom = persistentAtom<String>({
   key: 'repIdAtom',
   default: '',
 });
+
+export const loggedUserAtom = persistentAtom<any>({
+  key: 'loggedUserAtom',
+  default: {},
+});

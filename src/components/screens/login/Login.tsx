@@ -7,6 +7,7 @@ import {REPS_LIST_ENDPOINT} from '../../../constants/urls';
 import {useRecoilState, useSetRecoilState} from 'recoil';
 import {
   isLoggedInAtom,
+  loggedUserAtom,
   repIdAtom,
   spinnerVisibleAtom,
 } from '../../../recoil/atoms';
@@ -14,6 +15,7 @@ import {
   checkRepIdExists,
   connectToDatabase,
   createSalesRepsTable,
+  getUserByRepName,
   insertSalesReps,
 } from '../../../services/db-service';
 import {useNavigation} from '@react-navigation/native';
@@ -27,6 +29,7 @@ const Login = () => {
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
   const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInAtom);
   const [repId, setRepId] = useRecoilState(repIdAtom);
+  const [loggedUser, setLoggedUser] = useRecoilState(loggedUserAtom);
 
   const syncReps = async () => {
     setSpinnerVisible(true);
@@ -35,14 +38,17 @@ const Login = () => {
     await createSalesRepsTable(db);
     await insertSalesReps(db, result.data);
     setSpinnerVisible(false);
+    showSnackbar('Reps Synced Successfully');
   };
 
   const handleLogin = async () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
-    const isRepExists = await checkRepIdExists(db, repName);
-    if (isRepExists) {
-      setRepId(repName);
+    const user: any = await getUserByRepName(db, repName);
+    console.log(user);
+    if (user) {
+      setRepId(user.RepId);
+      setLoggedUser(user);
       showSnackbar('Successfully Logged In');
       setIsLoggedIn(true);
     } else {

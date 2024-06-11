@@ -557,6 +557,29 @@ export const getCustomersList = (db: SQLiteDatabase) => {
   });
 };
 
+export const getCustomerById = (db: SQLiteDatabase, cusId: string) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM customers WHERE CusId = ?;',
+        [cusId],
+        (tx, results) => {
+          const rows = results.rows.raw();
+          if (rows.length > 0) {
+            resolve(rows[0]);
+          } else {
+            resolve(false);
+          }
+        },
+        error => {
+          console.error('Failed to fetch customer:', error);
+          reject(error);
+        },
+      );
+    });
+  });
+};
+
 export const getItemsList = (db: SQLiteDatabase) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
@@ -603,15 +626,15 @@ export const getItemsGrnListByItemCodeandRepId = (
   });
 };
 
-export const checkRepIdExists = (db: SQLiteDatabase, repId: String) => {
+export const getUserByRepName = (db: SQLiteDatabase, repId: String) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `SELECT * FROM sales_reps WHERE RepId = ?`,
+        `SELECT * FROM sales_reps WHERE RepName = ?`,
         [repId],
         (tx, results) => {
           if (results.rows.length > 0) {
-            resolve(true);
+            resolve(results.rows.raw()[0]);
           } else {
             resolve(false);
           }
@@ -693,5 +716,64 @@ export const deleteInvoiceById = (db: SQLiteDatabase, invoiceId: number) => {
         reject(error);
       },
     );
+  });
+};
+
+export const emptyTable = async (db: SQLiteDatabase, tableName: String) => {
+  try {
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM ${tableName}`);
+    });
+    console.log(`Table ${tableName} has been emptied`);
+  } catch (error) {
+    console.log(`Error emptying table ${tableName}`, error);
+  }
+};
+
+export const reduceItemGrnQuantity = async (
+  db: SQLiteDatabase,
+  grnIndex: number,
+  quantityToReduce: number,
+) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT Quantity FROM items_grn WHERE Grn_Index = ?;',
+        [grnIndex],
+        async (tx, results) => {
+          if (results.rows.length > 0) {
+            const currentQuantity = results.rows.item(0).Quantity;
+            const newQuantity = currentQuantity - quantityToReduce;
+
+            // Ensure the new quantity is not negative
+            if (newQuantity < 0) {
+              console.log(
+                `Quantity for Grn_Index ${grnIndex} cannot be reduced below 0`,
+              );
+              resolve();
+              return;
+            }
+
+            await tx.executeSql(
+              'UPDATE items_grn SET Quantity = ? WHERE Grn_Index = ?',
+              [newQuantity, grnIndex],
+            );
+
+            console.log(
+              `Quantity for Grn_Index ${grnIndex} reduced by ${quantityToReduce}. New quantity is ${newQuantity}`,
+            );
+
+            resolve();
+          } else {
+            console.log(`Item with Grn_Index ${grnIndex} not found`);
+            resolve();
+          }
+        },
+        (tx, error) => {
+          console.error('Failed to fetch items:', error);
+          reject(error);
+        },
+      );
+    });
   });
 };

@@ -9,3 +9,5 @@ export const INVOICE_UPDATE_ENDPOINT =
   'https://www.aptsys.lk/API/public/api/invoice/update';
 export const REPS_LIST_ENDPOINT =
   'https://www.aptsys.lk/API/public/api/reps/gets';
+export const API_INVOICE_UPDATE_ENDPOINT =
+  'https://www.aptsys.lk/API/public/api/invoice/update';

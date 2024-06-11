@@ -4,6 +4,7 @@ import Home from '../components/screens/home/Home';
 import Settings from '../components/screens/settings/Settings';
 import {Text} from 'react-native-paper';
 import Invoices from '../components/screens/invoices/Invoices';
+import InvoicePrint from '../components/screens/home/InvoicePrint';
 
 const HomeStack = createStackNavigator();
 
@@ -16,6 +17,13 @@ const HomeStackScreen = () => {
         options={{
           headerTitle: () => <Text variant="titleMedium">Home</Text>,
           headerLeft: () => null,
+        }}
+      />
+      <HomeStack.Screen
+        name="Invoice"
+        component={InvoicePrint}
+        options={{
+          headerTitle: () => <Text variant="titleMedium">Invoice</Text>,
         }}
       />
     </HomeStack.Navigator>
@@ -45,11 +53,18 @@ const InvoicesStackScreen = () => {
   return (
     <InvoicesStack.Navigator>
       <InvoicesStack.Screen
-        name="Settings"
+        name="Invoices"
         component={Invoices}
         options={{
           headerTitle: () => <Text variant="titleMedium">Invoices</Text>,
           headerLeft: () => null,
+        }}
+      />
+      <InvoicesStack.Screen
+        name="Invoice"
+        component={InvoicePrint}
+        options={{
+          headerTitle: () => <Text variant="titleMedium">Invoice</Text>,
         }}
       />
     </InvoicesStack.Navigator>

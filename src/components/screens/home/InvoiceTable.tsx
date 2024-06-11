@@ -5,9 +5,15 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import {useState} from 'react';
 import {useRecoilValue, useSetRecoilState} from 'recoil';
 import {repIdAtom, spinnerVisibleAtom} from '../../../recoil/atoms';
-import {connectToDatabase, insertInvoice} from '../../../services/db-service';
+import {
+  connectToDatabase,
+  insertInvoice,
+  reduceItemGrnQuantity,
+} from '../../../services/db-service';
 import {useSnackbar} from '../../common/SnackbarContext';
 import ThermalPrinterModule from 'react-native-thermal-printer';
+import {useNavigation} from '@react-navigation/native';
+import {SQLiteDatabase} from 'react-native-sqlite-storage';
 
 interface InvoiceTableProps {
   shop: String;
@@ -29,6 +35,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   removeInvoiceDataById,
   clearInvoice,
 }) => {
+  const navigation = useNavigation();
   const repId = useRecoilValue(repIdAtom);
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
   const {showSnackbar} = useSnackbar();
@@ -63,10 +70,20 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         selectedStore: shop,
         dateTime: Date.now(),
       };
-      saveInvoice(invData);
-      printInvoice(invData);
+      navigation.navigate('Invoice', {
+        invoiceData: data,
+        total: calculateBillTotal(),
+        totalDiscount: discount,
+        paymentAmount: payment,
+        dateTime: Date.now(),
+        inv: data,
+        customerId: shop,
+        saveInvoice: saveInvoice,
+        saveInvoiceDataPayload: invData,
+      });
     }
   };
+  // TODO : createItemsGrnTable reduce Grn_Index
   const saveInvoice = async (invData: any) => {
     setSpinnerVisible(true);
     const invoiceEntity = {
@@ -91,9 +108,23 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     };
     const db = await connectToDatabase();
     await insertInvoice(db, invoiceEntity);
+    await reduceQuantitiesForData(db, data);
     clearInvoice();
     setSpinnerVisible(false);
     showSnackbar('Invoice saved successfully');
+  };
+
+  const reduceQuantitiesForData = async (db: SQLiteDatabase, data: any) => {
+    try {
+      for (const item of data) {
+        const {grnIndex, quantity} = item;
+        console.log('GRN Index: ' + grnIndex + ' Quantity: ' + quantity);
+        await reduceItemGrnQuantity(db, grnIndex, quantity);
+      }
+      console.log('All quantities reduced successfully');
+    } catch (error) {
+      console.log('Error reducing quantities for data', error);
+    }
   };
 
   const printInvoice = async (invData: any) => {

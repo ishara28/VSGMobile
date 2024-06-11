@@ -1,9 +1,13 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import {COMMON_COLORS} from '../../../resources/colors';
 import {Dialog, IconButton, Portal, Text, Button} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
+import moment from 'moment';
 
 const InvoiceItem = ({item, handleDelete}) => {
+  const navigation = useNavigation();
+
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const showDialog = () => setDialogVisible(true);
@@ -15,9 +19,23 @@ const InvoiceItem = ({item, handleDelete}) => {
     hideDialog();
   };
 
+  const handleNavigation = () => {
+    navigation.navigate('Invoice', {
+      invoiceData: JSON.parse(item.InvDetails),
+      total: item.InvoLabelPriceTotal,
+      totalDiscount: item.InvoDiscount,
+      paymentAmount: item.TotalPayment,
+      dateTime: moment(item.InvoDate).format('YYYY-MM-DD'),
+      inv: JSON.parse(item.InvDetails),
+      customerId: item?.CusId,
+      saveInvoice: null,
+      saveInvoiceDataPayload: null,
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <View>
+      <TouchableOpacity style={{flex: 1}} onPress={handleNavigation}>
         <View
           style={{flexDirection: 'column', justifyContent: 'space-between'}}>
           <Text variant="labelMedium">Invoice ID: {item.InvoNo}</Text>
@@ -30,7 +48,7 @@ const InvoiceItem = ({item, handleDelete}) => {
           </Text>
         </View>
         <Text variant="labelSmall">Total Payment: {item.TotalPayment}</Text>
-      </View>
+      </TouchableOpacity>
       <View>
         <IconButton
           icon="delete"

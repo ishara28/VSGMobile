@@ -1,9 +1,10 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import {Button} from 'react-native-paper';
+import React, {useState} from 'react';
+import {Button, Dialog, Portal} from 'react-native-paper';
 import {COMMON_COLORS} from '../../../resources/colors';
 import axios from 'axios';
 import {
+  API_INVOICE_UPDATE_ENDPOINT,
   CUSTOMER_ENDPOINT,
   ITEMS_ENDPOINT,
   ITEMS_GRN_ENDPOINT,
@@ -20,6 +21,8 @@ import {
   createItemsGrnTable,
   createItemsPricesTable,
   createItemsTable,
+  emptyTable,
+  getAllInvoices,
   insertCustomers,
   insertItems,
   insertItemsGrn,
@@ -31,6 +34,17 @@ const Settings = () => {
   const navigation = useNavigation();
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
   const setIsLoggedIn = useSetRecoilState(isLoggedInAtom);
+
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogMessage, setDialogMessage] = useState('');
+
+  const showDialog = () => setDialogVisible(true);
+  const hideDialog = () => setDialogVisible(false);
+
+  const handleResetAll = async () => {
+    hideDialog();
+  };
 
   const synCustomers = async () => {
     setSpinnerVisible(true);
@@ -65,6 +79,61 @@ const Settings = () => {
     setSpinnerVisible(false);
   };
 
+  const syncSales = async () => {
+    setSpinnerVisible(true);
+    const db = await connectToDatabase();
+    const result = await getAllInvoices(db);
+    const requestBody = {
+      invoices: result,
+    };
+    await axios
+      .post(API_INVOICE_UPDATE_ENDPOINT, requestBody)
+      .then(res => {
+        console.log(res);
+        setSpinnerVisible(false);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    setSpinnerVisible(false);
+  };
+
+  const clearTables = async () => {
+    setSpinnerVisible(true);
+    const db = await connectToDatabase();
+    await emptyTable(db, 'invoices');
+    await emptyTable(db, 'invoice_details');
+    await emptyTable(db, 'invoice_payments');
+    await emptyTable(db, 'items');
+    await emptyTable(db, 'items_grn');
+    await emptyTable(db, 'items_prices');
+    await emptyTable(db, 'customers');
+    setSpinnerVisible(false);
+  };
+
+  const showLogoutDialog = () => {
+    setDialogTitle('Logout');
+    setDialogMessage('Are you sure you want to logout?');
+    showDialog();
+  };
+
+  const showClearTablesDialog = () => {
+    setDialogTitle('Clear Tables');
+    setDialogMessage('Are you sure you want to clear all tables?');
+    showDialog();
+  };
+
+  const handleOnDialogConfirm = async () => {
+    setSpinnerVisible(true);
+    hideDialog();
+    if (dialogTitle === 'Logout') {
+      handleLogout();
+    } else if (dialogTitle === 'Clear Tables') {
+      clearTables();
+    }
+    setSpinnerVisible(false);
+  };
+
   const handleLogout = async () => {
     setIsLoggedIn(false);
     navigation.reset({
@@ -78,30 +147,58 @@ const Settings = () => {
       <Button
         mode="contained"
         style={[styles.button, styles.btn1]}
-        onPress={() => syncProducts()}>
+        onPress={() => syncProducts()}
+        icon={'sync'}>
         Sync Products
       </Button>
-      <Button mode="contained" style={[styles.button, styles.btn2]}>
+      <Button
+        mode="contained"
+        style={[styles.button, styles.btn2]}
+        onPress={() => syncSales()}
+        icon={'sync'}>
         Sync Sales
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn3]}
-        onPress={() => synCustomers()}>
+        onPress={() => synCustomers()}
+        icon={'sync'}>
         Sync Customers
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn4]}
-        onPress={() => syncInvoices()}>
+        onPress={() => syncInvoices()}
+        icon={'upload'}>
         Sync Invoices
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn5]}
-        onPress={() => handleLogout()}>
+        onPress={() => showClearTablesDialog()}
+        icon={'delete-alert'}>
+        Clear DB
+      </Button>
+      <Button
+        mode="contained"
+        style={[styles.button, styles.btn6]}
+        onPress={() => showLogoutDialog()}
+        icon={'logout'}>
         Logout
       </Button>
+
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+          <Dialog.Title>{dialogTitle}</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">{dialogMessage}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleOnDialogConfirm}>Yes</Button>
+            <Button onPress={hideDialog}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };
@@ -127,6 +224,9 @@ const styles = StyleSheet.create({
     backgroundColor: COMMON_COLORS.SUCCESS.W900,
   },
   btn5: {
+    backgroundColor: COMMON_COLORS.ERROR.W900,
+  },
+  btn6: {
     backgroundColor: COMMON_COLORS.BLACK,
   },
 });
