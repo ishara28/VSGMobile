@@ -25,7 +25,7 @@ const InvoiceItem = ({item, handleDelete}) => {
       total: item.InvoLabelPriceTotal,
       totalDiscount: item.InvoDiscount,
       paymentAmount: item.TotalPayment,
-      dateTime: moment(item.InvoDate).format('YYYY-MM-DD'),
+      dateTime: item.InvoDate,
       inv: JSON.parse(item.InvDetails),
       customerId: item?.CusId,
       saveInvoice: null,

@@ -220,12 +220,15 @@ const Home = () => {
           <View style={styles.addContainer}>
             <TouchableOpacity
               onPress={() => addToInvoice()}
+              style={{
+                backgroundColor: COMMON_COLORS.SUCCESS.W900,
+                paddingHorizontal: 20,
+                paddingVertical: 4,
+                borderRadius: 5,
+                marginLeft: 10,
+              }}
               disabled={quantity <= 0}>
-              <Icon
-                source="plus-box"
-                size={30}
-                color={COMMON_COLORS.SUCCESS.W900}
-              />
+              <Icon source="plus" size={30} color={COMMON_COLORS.WHITE} />
             </TouchableOpacity>
             <TextInput
               dense={true}
