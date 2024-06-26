@@ -53,7 +53,7 @@ const Login = () => {
       showSnackbar('Successfully Logged In');
       setIsLoggedIn(true);
     } else {
-      showSnackbar('Rep does not exist');
+      showSnackbar('Invalid Login!');
       setIsLoggedIn(false);
     }
     setSpinnerVisible(false);
