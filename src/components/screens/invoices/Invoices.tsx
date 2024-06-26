@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {FlatList, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
   connectToDatabase,
@@ -9,6 +9,7 @@ import {useSetRecoilState} from 'recoil';
 import {spinnerVisibleAtom} from '../../../recoil/atoms';
 import InvoiceItem from './InvoiceItem';
 import {useIsFocused} from '@react-navigation/native';
+import {Text} from 'react-native-paper';
 
 const Invoices = () => {
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
@@ -37,6 +38,7 @@ const Invoices = () => {
 
   return (
     <View style={styles.container}>
+      {invoices.length === 0 && <Text>No Invoices</Text>}
       <FlatList
         data={invoices}
         renderItem={({item}) => (

@@ -29,9 +29,11 @@ import {
   insertItemsPrices,
 } from '../../../services/db-service';
 import {useNavigation} from '@react-navigation/native';
+import {useSnackbar} from '../../common/SnackbarContext';
 
 const Settings = () => {
   const navigation = useNavigation();
+  const {showSnackbar} = useSnackbar();
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
   const setIsLoggedIn = useSetRecoilState(isLoggedInAtom);
 
@@ -46,16 +48,18 @@ const Settings = () => {
     hideDialog();
   };
 
-  const synCustomers = async () => {
+  const downloadShops = async () => {
     setSpinnerVisible(true);
     const response = await axios.get(CUSTOMER_ENDPOINT);
     const db = await connectToDatabase();
     await createCustomerTable(db);
     await insertCustomers(db, response.data);
+    await createInvoiceTables();
     setSpinnerVisible(false);
+    showSnackbar('Shops Downloaded Successfully');
   };
 
-  const syncProducts = async () => {
+  const downloadProducts = async () => {
     setSpinnerVisible(true);
     const items = await axios.get(ITEMS_ENDPOINT);
     const items_grn = await axios.get(ITEMS_GRN_ENDPOINT);
@@ -68,9 +72,10 @@ const Settings = () => {
     await insertItemsGrn(db, items_grn.data);
     await insertItemsPrices(db, items_price.data);
     setSpinnerVisible(false);
+    showSnackbar('Products Downloaded Successfully');
   };
 
-  const syncInvoices = async () => {
+  const createInvoiceTables = async () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
     await createInvoicesTable(db);
@@ -79,7 +84,7 @@ const Settings = () => {
     setSpinnerVisible(false);
   };
 
-  const syncSales = async () => {
+  const uploadInvoices = async () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
     const result = await getAllInvoices(db);
@@ -96,6 +101,17 @@ const Settings = () => {
         console.log(error);
       });
     setSpinnerVisible(false);
+    showSnackbar('Invoices Uploaded Successfully');
+  };
+
+  const downloadGRN = async () => {
+    setSpinnerVisible(true);
+    const items_grn = await axios.get(ITEMS_GRN_ENDPOINT);
+    const db = await connectToDatabase();
+    await createItemsGrnTable(db);
+    await insertItemsGrn(db, items_grn.data);
+    setSpinnerVisible(false);
+    showSnackbar('GRN Downloaded Successfully');
   };
 
   const clearTables = async () => {
@@ -132,6 +148,7 @@ const Settings = () => {
       clearTables();
     }
     setSpinnerVisible(false);
+    showSnackbar('Database Cleared Successfully');
   };
 
   const handleLogout = async () => {
@@ -147,30 +164,30 @@ const Settings = () => {
       <Button
         mode="contained"
         style={[styles.button, styles.btn1]}
-        onPress={() => syncProducts()}
-        icon={'sync'}>
-        Sync Products
+        onPress={() => downloadProducts()}
+        icon={'download'}>
+        Download Products
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn2]}
-        onPress={() => syncSales()}
-        icon={'sync'}>
-        Sync Sales
+        onPress={() => downloadGRN()}
+        icon={'download'}>
+        Download GRN
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn3]}
-        onPress={() => synCustomers()}
-        icon={'sync'}>
-        Sync Customers
+        onPress={() => downloadShops()}
+        icon={'download'}>
+        Download Shops
       </Button>
       <Button
         mode="contained"
         style={[styles.button, styles.btn4]}
-        onPress={() => syncInvoices()}
+        onPress={() => uploadInvoices()}
         icon={'upload'}>
-        Sync Invoices
+        Upload Invoices
       </Button>
       <Button
         mode="contained"

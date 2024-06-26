@@ -31,6 +31,7 @@ const Home = () => {
   const isFocussed = useIsFocused();
   const [shop, setShop] = useState(null || '');
   const [item, setItem] = useState('');
+  const [itemName, setItemName] = useState('');
   const repId = useRecoilValue(repIdAtom);
   const [isFocusShopDrodown, setIsFocusShopDrodown] = useState(false);
   const [isFocusItemDrodown, setIsItemShopDrodown] = useState(false);
@@ -86,10 +87,13 @@ const Home = () => {
     setExpandedItem(item);
     const db = await connectToDatabase();
     const result = await getItemsByStockIdandCusId(db, item.SockId, shop);
+    console.log('PRICE ::: ', result);
     setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
   };
 
   const addToInvoice = () => {
+    console.log(quantity);
+    console.log(selectedItemDetails);
     if (expandedItem.Quantity >= quantity) {
       const itemExists = invoiceData.some(
         item => item.grnIndex === selectedItemDetails.grnIndex,
@@ -100,7 +104,7 @@ const Home = () => {
           ...invoiceData,
           {
             itemCode: selectedItemDetails.ItemCode,
-            itemName: item,
+            itemName: itemName,
             labelPrice: selectedItemDetails.SalePrice,
             itemDiscount: 0,
             unitPrice: selectedItemDetails.SalePrice,
@@ -181,6 +185,7 @@ const Home = () => {
           onBlur={() => setIsItemShopDrodown(false)}
           onChange={(i: any) => {
             setItem(i.value);
+            setItemName(i.label);
             setIsItemShopDrodown(false);
             filterItems(i.value);
           }}

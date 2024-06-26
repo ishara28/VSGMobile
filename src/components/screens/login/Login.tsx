@@ -26,6 +26,7 @@ const Login = () => {
   const {showSnackbar} = useSnackbar();
 
   const [repName, setRepName] = useState('');
+  const [password, setPassword] = useState('');
   const setSpinnerVisible = useSetRecoilState(spinnerVisibleAtom);
   const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInAtom);
   const [repId, setRepId] = useRecoilState(repIdAtom);
@@ -44,7 +45,7 @@ const Login = () => {
   const handleLogin = async () => {
     setSpinnerVisible(true);
     const db = await connectToDatabase();
-    const user: any = await getUserByRepName(db, repName);
+    const user: any = await getUserByRepName(db, repName, password);
     console.log(user);
     if (user) {
       setRepId(user.RepId);
@@ -77,10 +78,18 @@ const Login = () => {
       />
       <View style={styles.formView}>
         <TextInput
-          label="Rep Name"
+          label="Rep Id"
           style={styles.textInput}
           value={repName}
           onChangeText={setRepName}
+          underlineColor="transparent"
+          underlineStyle={{borderWidth: 0}}
+        />
+        <TextInput
+          label="Password"
+          style={styles.textInput}
+          value={password}
+          onChangeText={setPassword}
           underlineColor="transparent"
           underlineStyle={{borderWidth: 0}}
         />
@@ -118,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   formView: {paddingHorizontal: 20, width: '100%', marginTop: 20},
-  textInput: {width: '100%', marginBottom: 10, borderRadius: 8},
+  textInput: {width: '100%', marginBottom: 10, borderRadius: 4},
   button: {
     margin: 5,
     borderRadius: 8,

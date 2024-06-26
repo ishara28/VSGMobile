@@ -190,7 +190,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         {data.map((item: any) => (
           <DataTable.Row key={item.id}>
             <DataTable.Cell style={styles.cellContainer}>
-              {item.itemName}
+              <Text style={{fontSize: 11}}>{item.itemName}</Text>
             </DataTable.Cell>
             <DataTable.Cell style={styles.cellContainer}>
               {item.quantity}

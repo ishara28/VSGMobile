@@ -70,9 +70,8 @@ export const createItemsGrnTable = (db: SQLiteDatabase) => {
   db.transaction(tx => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS items_grn (
-         id INTEGER PRIMARY KEY AUTOINCREMENT,
          DeviceUpdatedTime TEXT,
-         Grn_Index INTEGER,
+         Grn_Index INTEGER PRIMARY KEY,
          ItemCode TEXT,
          Quantity INTEGER,
          RepId TEXT,
@@ -125,6 +124,8 @@ export const createSalesRepsTable = (db: SQLiteDatabase) => {
         CreateDate TEXT,
         RepId TEXT PRIMARY KEY,
         RepName TEXT,
+        LoginId TEXT,
+        PassWord TEXT,
         Status TEXT
       )`,
       [],
@@ -410,6 +411,8 @@ export const insertSalesReps = (db: SQLiteDatabase, salesReps: any[]) => {
       "${rep.CreateDate}",
       "${rep.RepId}",
       "${rep.RepName}",
+      "${rep.LoginId}",
+      "${rep.PassWord}",
       "${rep.Status}"
     )`,
     )
@@ -417,7 +420,7 @@ export const insertSalesReps = (db: SQLiteDatabase, salesReps: any[]) => {
 
   const sql = `
     INSERT INTO sales_reps (
-      CreateDate, RepId, RepName, Status
+      CreateDate, RepId, RepName, LoginId, PassWord, Status
     ) VALUES ${values};
   `;
 
@@ -626,12 +629,16 @@ export const getItemsGrnListByItemCodeandRepId = (
   });
 };
 
-export const getUserByRepName = (db: SQLiteDatabase, repId: String) => {
+export const getUserByRepName = (
+  db: SQLiteDatabase,
+  repId: String,
+  password: String,
+) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `SELECT * FROM sales_reps WHERE RepName = ?`,
-        [repId],
+        `SELECT * FROM sales_reps WHERE LoginId = ? AND PassWord = ?;`,
+        [repId, password],
         (tx, results) => {
           if (results.rows.length > 0) {
             resolve(results.rows.raw()[0]);
