@@ -163,6 +163,13 @@ const Settings = () => {
     <View style={styles.container}>
       <Button
         mode="contained"
+        style={[styles.button, styles.btn3]}
+        onPress={() => downloadShops()}
+        icon={'download'}>
+        Download Shops
+      </Button>
+      <Button
+        mode="contained"
         style={[styles.button, styles.btn1]}
         onPress={() => downloadProducts()}
         icon={'download'}>
@@ -175,13 +182,7 @@ const Settings = () => {
         icon={'download'}>
         Download GRN
       </Button>
-      <Button
-        mode="contained"
-        style={[styles.button, styles.btn3]}
-        onPress={() => downloadShops()}
-        icon={'download'}>
-        Download Shops
-      </Button>
+
       <Button
         mode="contained"
         style={[styles.button, styles.btn4]}

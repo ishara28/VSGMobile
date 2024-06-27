@@ -541,13 +541,16 @@ export const getCustomersList = (db: SQLiteDatabase) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT CusId, CustomerName FROM customers;',
+        'SELECT CusId, CustomerName, Add1, Add2, Add3 FROM customers;',
         [],
         (tx, results) => {
           const rows = results.rows.raw();
           const customerList = rows.map(row => ({
             label: row.CustomerName,
             value: row.CusId,
+            address1: row.Add1,
+            address2: row.Add2,
+            address3: row.Add3,
           }));
           resolve(customerList);
         },

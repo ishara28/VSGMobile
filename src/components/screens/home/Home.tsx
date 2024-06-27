@@ -30,6 +30,7 @@ const Home = () => {
   const {showSnackbar} = useSnackbar();
   const isFocussed = useIsFocused();
   const [shop, setShop] = useState(null || '');
+  const [shopAddress, setShopAddress] = useState('');
   const [item, setItem] = useState('');
   const [itemName, setItemName] = useState('');
   const repId = useRecoilValue(repIdAtom);
@@ -92,8 +93,6 @@ const Home = () => {
   };
 
   const addToInvoice = () => {
-    console.log(quantity);
-    console.log(selectedItemDetails);
     if (expandedItem.Quantity >= quantity) {
       const itemExists = invoiceData.some(
         item => item.grnIndex === selectedItemDetails.grnIndex,
@@ -121,6 +120,7 @@ const Home = () => {
     } else {
       showSnackbar('Quantity cannot be greater than available quantity.');
     }
+    setSelectedItemDetails(null);
   };
 
   const removeInvoiceDataById = (grnIndex: String) => {
@@ -154,6 +154,7 @@ const Home = () => {
         onBlur={() => setIsFocusShopDrodown(false)}
         onChange={(i: any) => {
           setShop(i.value);
+          setShopAddress(i.address1 + ', ' + i.address2 + ', ' + i.address3);
           setIsFocusShopDrodown(false);
         }}
         renderLeftIcon={() => (
@@ -199,6 +200,8 @@ const Home = () => {
           )}
         />
       )}
+      <Text variant="labelSmall">{shop}</Text>
+      <Text variant="labelSmall">{shopAddress}</Text>
       {filteredItemsList.length > 0 && item !== '' && (
         <ItemsTable data={filteredItemsList} getItemPrice={getItemPrice} />
       )}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {DataTable, Button, Text, Icon} from 'react-native-paper';
+import {DataTable, Button, Text, Icon, IconButton} from 'react-native-paper';
 import {COMMON_COLORS} from '../../../resources/colors';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 
@@ -32,9 +32,16 @@ const ItemsTable: React.FC<ItemsTableProps> = ({data, getItemPrice}) => {
             {item.Quantity}
           </DataTable.Cell>
           <DataTable.Cell style={styles.cellContainer}>
-            <TouchableOpacity onPress={() => getItemPrice(item)}>
-              <Icon source="arrow-right-box" size={20} />
-            </TouchableOpacity>
+            <IconButton
+              icon="chevron-double-right"
+              iconColor="white"
+              style={{
+                backgroundColor: COMMON_COLORS.SUCCESS.W900,
+                borderRadius: 8,
+              }}
+              onPress={() => getItemPrice(item)}
+              size={15}
+            />
           </DataTable.Cell>
         </DataTable.Row>
       ))}
