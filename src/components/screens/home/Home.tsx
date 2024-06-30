@@ -57,6 +57,9 @@ const Home = () => {
     setShop(null || '');
     setItem('');
     hideDialog();
+    setShopAddress("");
+    setShop("");
+    console.log(selectedItemDetails)
   };
 
   useEffect(() => {
@@ -88,8 +91,15 @@ const Home = () => {
     setExpandedItem(item);
     const db = await connectToDatabase();
     const result = await getItemsByStockIdandCusId(db, item.SockId, shop);
-    console.log('PRICE ::: ', result);
-    setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
+    console.log('PRICE ::: ', result.length);
+    if(result.length > 0){
+        setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
+    }else{
+        showSnackbar(
+            'Prices are not allocated for this product',
+        );
+    }
+
   };
 
   const addToInvoice = () => {
@@ -189,6 +199,7 @@ const Home = () => {
             setItemName(i.label);
             setIsItemShopDrodown(false);
             filterItems(i.value);
+            setSelectedItemDetails(null);
           }}
           renderLeftIcon={() => (
             <AntDesign
@@ -205,7 +216,7 @@ const Home = () => {
       {filteredItemsList.length > 0 && item !== '' && (
         <ItemsTable data={filteredItemsList} getItemPrice={getItemPrice} />
       )}
-      {selectedItemDetails !== null && (
+      {selectedItemDetails !== "" && (
         <View>
           <View style={styles.selectedItemContainer}>
             <View>
