@@ -216,7 +216,7 @@ const Home = () => {
       {filteredItemsList.length > 0 && item !== '' && (
         <ItemsTable data={filteredItemsList} getItemPrice={getItemPrice} />
       )}
-      {selectedItemDetails !== "" && (
+      {selectedItemDetails !== null && (
         <View>
           <View style={styles.selectedItemContainer}>
             <View>
