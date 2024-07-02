@@ -57,9 +57,8 @@ const Home = () => {
     setShop(null || '');
     setItem('');
     hideDialog();
-    setShopAddress("");
-    setShop("");
-    console.log(selectedItemDetails)
+    setShopAddress('');
+    setShop('');
   };
 
   useEffect(() => {
@@ -91,15 +90,11 @@ const Home = () => {
     setExpandedItem(item);
     const db = await connectToDatabase();
     const result = await getItemsByStockIdandCusId(db, item.SockId, shop);
-    console.log('PRICE ::: ', result.length);
-    if(result.length > 0){
-        setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
-    }else{
-        showSnackbar(
-            'Prices are not allocated for this product',
-        );
+    if (result.length > 0) {
+      setSelectedItemDetails({...result[0], grnIndex: item.Grn_Index});
+    } else {
+      showSnackbar('Prices are not allocated for this product');
     }
-
   };
 
   const addToInvoice = () => {
@@ -141,6 +136,11 @@ const Home = () => {
     handleResetAll();
   };
 
+  const handleResetItems = () => {
+    setFilteredItemsList([]);
+    setItem('');
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -166,6 +166,7 @@ const Home = () => {
           setShop(i.value);
           setShopAddress(i.address1 + ', ' + i.address2 + ', ' + i.address3);
           setIsFocusShopDrodown(false);
+          handleResetItems();
         }}
         renderLeftIcon={() => (
           <AntDesign
