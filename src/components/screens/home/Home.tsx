@@ -139,6 +139,7 @@ const Home = () => {
   const handleResetItems = () => {
     setFilteredItemsList([]);
     setItem('');
+    setInvoiceData([]);
   };
 
   return (
