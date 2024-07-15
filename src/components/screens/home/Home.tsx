@@ -115,6 +115,7 @@ const Home = () => {
             quantity: quantity,
             total: quantity * selectedItemDetails.SalePrice,
             grnIndex: selectedItemDetails.grnIndex,
+            stockId: selectedItemDetails.StockId,
           },
         ]);
       } else {
@@ -140,6 +141,7 @@ const Home = () => {
     setFilteredItemsList([]);
     setItem('');
     setInvoiceData([]);
+    setSelectedItemDetails(null);
   };
 
   return (
